@@ -12,9 +12,8 @@ def login(request):
 def signUp(request):
     ser = UserSerializer(data = request.data)
     if ser.is_valid():
-        ser.save()
-        user = User.objects.get(username = request.data['username'])
-        token = Token.objects.create(user)
-        return Response({'Token':token,'user_data':ser.data})
+        user = ser.save()
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'Token': token.key, 'user_data': ser.data}, status=201)
     else:
-        return Response({"Response":"An error occured"})
+        return Response({"Response": "An error occurred", "errors": ser.errors}, status=400)
